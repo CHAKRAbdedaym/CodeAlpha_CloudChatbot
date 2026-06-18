@@ -1,24 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
 import { toast } from "sonner";
+import { saveMessage } from "@/actions/chat";
+import { createConversation } from "@/actions/conversation";
+import { useRouter } from "next/navigation";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
 }
 
-export function ChatWindow() {
-  const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hello! I'm your Cloud Computing Assistant. How can I help you today with AWS, Azure, GCP, or DevOps?" }
-  ]);
+interface ChatWindowProps {
+  id?: string;
+  initialMessages?: Message[];
+}
+
+export function ChatWindow({ id, initialMessages = [] }: ChatWindowProps) {
+  const [messages, setMessages] = useState<Message[]>(
+    initialMessages.length > 0 
+      ? initialMessages 
+      : [{ role: "assistant", content: "Hello! I'm your Cloud Computing Assistant. How can I help you today with AWS, Azure, GCP, or DevOps?" }]
+  );
   const [isLoading, setIsLoading] = useState(false);
+  const [currentId, setCurrentId] = useState<string | undefined>(id);
   const scrollRef = useAutoScroll<HTMLDivElement>(messages);
+  const router = useRouter();
 
   const handleSend = async (content: string) => {
+    let conversationId = currentId;
+
+    // 1. If no conversation exists, create one
+    if (!conversationId) {
+      try {
+        const newConv = await createConversation(content.slice(0, 30) + "...");
+        conversationId = newConv.id;
+        setCurrentId(newConv.id);
+        // Silently update URL without reload
+        window.history.pushState({}, "", `/chat/${newConv.id}`);
+      } catch (err) {
+        toast.error("Failed to start conversation");
+        return;
+      }
+    }
+
+    // 2. Save user message to DB
+    try {
+      await saveMessage(conversationId, "user", content);
+    } catch (err) {
+      console.error("Failed to save user message");
+    }
+
     const newUserMessage: Message = { role: "user", content };
     setMessages((prev) => [...prev, newUserMessage]);
     setIsLoading(true);
@@ -27,7 +62,7 @@ export function ChatWindow() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, conversationId }),
       });
 
       if (!response.ok) {
@@ -37,10 +72,8 @@ export function ChatWindow() {
       if (!response.body) throw new Error("No response body");
 
       const reader = response.body.getReader();
-      const decoder = new TextEncoder().decode(""); // Just initializing
       let assistantMessage = "";
       
-      // Add empty assistant message to start streaming into it
       setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
       while (true) {
@@ -57,6 +90,13 @@ export function ChatWindow() {
           }
           return prev;
         });
+      }
+
+      // 3. Save assistant message to DB after stream finishes
+      try {
+        await saveMessage(conversationId, "assistant", assistantMessage);
+      } catch (err) {
+        console.error("Failed to save assistant message");
       }
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
@@ -86,7 +126,7 @@ export function ChatWindow() {
               </div>
            )}
         </div>
-        <div className="h-32" /> {/* Bottom spacer for input padding */}
+        <div className="h-40" />
       </div>
       <ChatInput onSend={handleSend} isLoading={isLoading} />
     </div>
