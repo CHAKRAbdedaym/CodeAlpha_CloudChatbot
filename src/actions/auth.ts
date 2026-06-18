@@ -12,7 +12,7 @@ export async function login(formData: FormData) {
   const validated = authSchema.safeParse({ email, password });
 
   if (!validated.success) {
-    return { error: validated.error.errors[0].message };
+    return { error: validated.error.issues[0].message };
   }
 
   const supabase = await createClient();
@@ -36,7 +36,7 @@ export async function signup(formData: FormData) {
   const validated = authSchema.safeParse({ email, password });
 
   if (!validated.success) {
-    return { error: validated.error.errors[0].message };
+    return { error: validated.error.issues[0].message };
   }
 
   const supabase = await createClient();
