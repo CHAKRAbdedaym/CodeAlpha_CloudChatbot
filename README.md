@@ -86,3 +86,5 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ## 📄 License
 
 This project is part of the CodeAlpha Cloud Computing Internship.
+read and understand befor clone <3
+
