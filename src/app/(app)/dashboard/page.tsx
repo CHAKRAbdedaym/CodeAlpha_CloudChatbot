@@ -63,7 +63,7 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {recentConversations.length > 0 ? (
-                recentConversations.map((conv) => (
+                recentConversations.map((conv: any) => (
                   <Link key={conv.id} href={`/chat/${conv.id}`}>
                     <div className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800 transition-colors border border-transparent hover:border-zinc-700">
                       <div className="flex items-center gap-3">

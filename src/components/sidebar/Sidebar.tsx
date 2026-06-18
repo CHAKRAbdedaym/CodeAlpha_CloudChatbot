@@ -107,7 +107,7 @@ export function Sidebar() {
 
       <ScrollArea className="flex-1 px-2 mt-2">
         <div className="flex flex-col gap-1">
-          {conversations.map((conv) => (
+          {conversations.map((conv: any) => (
             <div key={conv.id} className="group relative">
                <Link href={`/chat/${conv.id}`} className="block">
                   <Button
