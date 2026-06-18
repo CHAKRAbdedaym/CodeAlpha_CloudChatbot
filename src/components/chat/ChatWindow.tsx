@@ -4,7 +4,7 @@ import { useState } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import { useAutoScroll } from "@/hooks/useAutoScroll";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,30 +19,64 @@ export function ChatWindow() {
   const scrollRef = useAutoScroll<HTMLDivElement>(messages);
 
   const handleSend = async (content: string) => {
-    // Optimistic UI
     const newUserMessage: Message = { role: "user", content };
     setMessages((prev) => [...prev, newUserMessage]);
     setIsLoading(true);
 
-    // Call API (will implement in next phase)
-    setTimeout(() => {
-       setMessages((prev) => [...prev, { role: "assistant", content: "This is a placeholder response. Gemini streaming will be integrated in the next phase." }]);
-       setIsLoading(false);
-    }, 1000);
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextEncoder().decode(""); // Just initializing
+      let assistantMessage = "";
+      
+      // Add empty assistant message to start streaming into it
+      setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const text = new TextDecoder().decode(value);
+        assistantMessage += text;
+        
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last.role === "assistant") {
+            return [...prev.slice(0, -1), { ...last, content: assistantMessage }];
+          }
+          return prev;
+        });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col h-full bg-zinc-950">
       <div 
         ref={scrollRef}
-        className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800"
+        className="flex-1 overflow-y-auto scrollbar-none"
       >
         <div className="max-w-4xl mx-auto py-8">
            {messages.map((m, i) => (
              <MessageBubble key={i} message={m} />
            ))}
-           {isLoading && (
-              <div className="p-6 flex gap-4 bg-zinc-900/30">
+           {isLoading && messages[messages.length - 1].role === 'user' && (
+              <div className="p-6 flex gap-4 bg-zinc-900/30 border-y border-zinc-800/50">
                  <div className="flex h-8 w-8 items-center justify-center rounded-md border border-blue-500 bg-blue-600">
                    <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
                  </div>
@@ -52,6 +86,7 @@ export function ChatWindow() {
               </div>
            )}
         </div>
+        <div className="h-32" /> {/* Bottom spacer for input padding */}
       </div>
       <ChatInput onSend={handleSend} isLoading={isLoading} />
     </div>
