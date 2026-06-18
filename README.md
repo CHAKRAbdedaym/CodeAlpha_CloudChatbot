@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CloudChatbot - Production-Ready Cloud Computing Assistant
 
-## Getting Started
+![CloudChatbot Banner](https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop)
 
-First, run the development server:
+A professional, modern, and production-ready AI chatbot built for the **CodeAlpha Cloud Computing Internship Task 4**. This application serves as a comprehensive assistant for all things cloud, helping users navigate AWS, Azure, GCP, Kubernetes, and more.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Features
+
+- **AI-Powered Conversations**: Real-time streaming responses via Google Gemini AI.
+- **Cloud Expertise**: Specialized system instructions for Cloud Computing, DevOps, and Networking.
+- **Chat History**: Persistent conversation storage using Supabase PostgreSQL (via Prisma).
+- **Secure Authentication**: Robust session management using Supabase SSR Auth.
+- **Modern UI/UX**: Premium ChatGPT-like interface built with Next.js 15, Tailwind CSS, and shadcn/ui.
+- **Advanced Markdown**: Full support for code blocks, syntax highlighting, and Mermaid diagrams.
+- **Dashboard**: Track your usage stats and recent activity.
+- **Dark/Light Mode**: Persisted theme preferences with smooth transitions.
+
+## 🛠 Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Database**: Supabase PostgreSQL
+- **ORM**: Prisma
+- **AI**: Google Gemini API
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Icons**: Lucide Icons
+- **Deployment**: Vercel
+
+## ⚙️ Environment Variables
+
+Create a `.env.local` file in the root directory and add the following variables:
+
+```env
+# Gemini API
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+
+# Supabase Auth & Client
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Database (Prisma)
+DATABASE_URL="postgresql://postgres:[password]@db.[id].supabase.co:5432/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[password]@db.[id].supabase.co:5432/postgres"
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🏗 Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/CHAKRAbdedaym/CodeAlpha_CloudChatbot.git
+   cd CodeAlpha_CloudChatbot
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-## Learn More
+3. **Initialize Prisma**:
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Supabase Setup
+1. Create a new Supabase project.
+2. Under "Settings" -> "API", get your URL and Anon Key.
+3. Under "Settings" -> "Database", get your connection strings (pooled and direct).
 
-## Deploy on Vercel
+### Vercel Deployment
+1. Push your code to GitHub.
+2. Connect your repository to Vercel.
+3. Add all environment variables.
+4. Deploy!
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is part of the CodeAlpha Cloud Computing Internship.

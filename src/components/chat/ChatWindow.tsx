@@ -49,7 +49,7 @@ export function ChatWindow({ id, initialMessages = [] }: ChatWindowProps) {
 
     // 2. Save user message to DB
     try {
-      await saveMessage(conversationId, "user", content);
+      await saveMessage(conversationId!, "user", content);
     } catch (err) {
       console.error("Failed to save user message");
     }
@@ -94,7 +94,7 @@ export function ChatWindow({ id, initialMessages = [] }: ChatWindowProps) {
 
       // 3. Save assistant message to DB after stream finishes
       try {
-        await saveMessage(conversationId, "assistant", assistantMessage);
+        await saveMessage(conversationId!, "assistant", assistantMessage);
       } catch (err) {
         console.error("Failed to save assistant message");
       }
