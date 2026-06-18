@@ -10,6 +10,13 @@ export async function getConversations() {
 
   if (!user) return [];
 
+  // Ensure user exists in Prisma (sync check)
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email! },
+    create: { id: user.id, email: user.email! },
+  });
+
   return await prisma.conversation.findMany({
     where: { userId: user.id },
     orderBy: { updatedAt: "desc" },
@@ -21,6 +28,13 @@ export async function createConversation(title?: string) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) throw new Error("Unauthorized");
+
+  // Ensure user exists in Prisma (sync check)
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email! },
+    create: { id: user.id, email: user.email! },
+  });
 
   const conversation = await prisma.conversation.create({
     data: {

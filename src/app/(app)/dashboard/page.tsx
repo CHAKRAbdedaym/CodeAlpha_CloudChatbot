@@ -12,6 +12,13 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
+  // Ensure user exists in Prisma (sync check)
+  await prisma.user.upsert({
+    where: { id: user.id },
+    update: { email: user.email! },
+    create: { id: user.id, email: user.email! },
+  });
+
   const [totalConversations, totalMessages, recentConversations] = await Promise.all([
     prisma.conversation.count({ where: { userId: user.id } }),
     prisma.message.count({ 
